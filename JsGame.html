@@ -1,0 +1,215 @@
+              <!-- 11/13-08-2020 Tuesday -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JsGame</title>
+    <link rel="stylesheet" href="JsGame.css">
+</head>
+<body>
+    <div class="carGame">
+        <div class="score"></div>
+        <div class="startScreen">
+            <p>Press here to start <br>
+            Arrows Keys to move <br>
+            If you hit another car you will lose.
+          </p>
+        </div>
+        <!-- <div class="gameArea hide"></div> -->
+        <div class="gameArea"></div>
+    </div>
+
+    <script>
+        const score = document.querySelector('.score');
+        const startScreen = document.querySelector('.startScreen');
+        const gameArea = document.querySelector('.gameArea');
+
+        startScreen.addEventListener('click',start);
+
+        let player = { speed:15,score:0};
+
+        console.log(gameArea);
+        let keys = {ArrowUp : false,ArrowDown :false, ArrowLeft : false,ArrowRight : false}
+
+        document.addEventListener('keydown', keyDown);//keydown = Event,keyDown=(callBy Function)
+        document.addEventListener('keyup', keyUp);
+
+         function keyDown(e){ //We pass (e) as parameter bcz to stop the by default functionality of Js
+             e.preventDefault();// To stop By default features/functionality of Js
+             keys[e.key] = true;
+            //  console.log(e.key);
+            //  console.log(keys);
+         }
+
+         function keyUp(e){ 
+             e.preventDefault();
+             keys[e.key] = false;
+            //  console.log(e.key);
+            //  console.log(keys);
+         }
+        //  Day-3
+        // Here a is for Own Car,b is for Enemy car
+        function isCollide(a,b){
+            aReact = a.getBoundingClientRect();
+            bReact = b.getBoundingClientRect();
+
+            // Condition @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+            return ! ((aReact.bottom < bReact.top) || (aReact.top > bReact.bottom)
+                      || (aReact.right < bReact.left) || (aReact.left > bReact.right))
+
+        }
+        function moveLines(){
+            let lines = document.querySelectorAll('.lines');
+            lines.forEach(function(item){
+
+                // For Lines Repeating @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+                if(item.y >= 700){
+                    item.y -= 750;
+                }
+                item.y += player.speed;
+                // For Positioning
+                item.style.top = item.y + "px";
+                
+            })
+
+        }
+        //Day-5
+        function endGame(){
+            player.start = false;
+            startScreen.classList.remove('hide');
+            
+            startScreen.innerHTML = "Gave Over <br> Your Final Score is " + player.score + " <br> Press Here to Restart the game"
+        }
+        //Day-5
+        function moveEnemy(car){
+            let enemy = document.querySelectorAll('.enemy');
+            enemy.forEach(function(item){
+
+            //    Topic of JS Closuer & Lexical Scope  asked in Interview
+            if(isCollide(car,item)){
+                console.log("Boom Hit");
+                //Day-5
+                endGame();
+                //Day-5
+            }
+
+                // For Car Repeating
+                             // After
+                // if(item.y >= 750){
+                //     item.y -= 300;
+                               //    Before
+                    // 3 & 4th wala chipak ke aa raha h
+                    if(item.y >= 750){
+                    item.y = -300;
+                        // For Generating Random Position
+                    item.style.left = Math.floor(Math.random() * 350 ) + "px";
+                }
+                item.y += player.speed;
+                // For Positioning
+                item.style.top = item.y + "px";
+                
+            })
+
+        }
+        // Day-2
+         function gamePlay(){
+            //    console.log("Hey I am Clicked");
+               let car = document.querySelector('.car');
+               let road = gameArea.getBoundingClientRect(); // It describes the whole area dimension
+            //    console.log(road);
+    
+             if(player.start){
+
+                //  Day-3
+                moveLines();
+                moveEnemy(car);
+                // Day-2
+                 if(keys.ArrowUp && player.y > (road.top+140)) {player.y -= player.speed}
+                 if(keys.ArrowDown && player.y < (road.bottom-70)) {player.y += player.speed}
+                 if(keys.ArrowLeft && player.x > 0) {player.x -= player.speed}
+                 if(keys.ArrowRight && player.x < (road.width-50)) {player.x += player.speed}
+
+                 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+                 car.style.top = player.y + "px";
+                 car.style.left = player.x + "px";
+
+                window.requestAnimationFrame(gamePlay);
+                //Day-5
+                console.log(player.score++);
+                player.score++;
+                //Without it ,it show 2 less score as compared to mainScore board
+                let ps = player.score - 2;
+                score.innerText ="Score:" + ps;
+                //Day-5
+                
+             }
+         }
+
+         function start(){
+            //  gameArea.classList.remove('hide');
+             startScreen.classList.add('hide');
+             gameArea.innerHTML = "";
+             player.start = true;
+              // **********************************15-08-2020********8:38 PM******************************** 
+             //Day-5
+             player.score = 0;
+             //Day-5
+             window.requestAnimationFrame(gamePlay);//Apne hi fnctn ke undr multpl loop chala skte hn
+
+            // For Running Lines on the Road 14-08-20
+            for(x=0; x<5; x++){
+                let roadLine = document.createElement('div');
+                roadLine.setAttribute('class','lines');
+                // 0*150=0 tk fr 150*1 =150 + 100 =250
+                // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@2
+                roadLine.y = (x*150);
+                roadLine.style.top = roadLine.y + "px";
+                gameArea.appendChild(roadLine);
+             }
+            
+
+             // Ek Element ke under dusra element kaise banate hain,Car Codes
+            let car = document.createElement('div');
+            car.setAttribute('class','car');
+            // car.innerText = "Hey I am ur car";
+            gameArea.appendChild(car);
+
+            // **********************************13-08-2020********9:36 AM********************************
+            // console.log("Top Position" + car.offsetTop);
+            // console.log("Left Position" + car.offsetLeft);
+           // **********************************14-08-2020********7:36 AM********************************       
+            //   Get position of car
+             player.x = car.offsetLeft;
+             player.y = car.offsetTop;  
+
+             // For Running EnemyCar on the Road 14-08-20
+            for(x=0; x<3; x++){
+                let enemyCar = document.createElement('div');
+                enemyCar.setAttribute('class','enemy');
+                // 0*150=0 tk fr 150*1 =150 + 100 =250
+
+                // 3sra aane ke baad jo 4th wala aa raha hai us main bht difference h
+                      // For Solving their Differnce
+                enemyCar.y = ((x+1) * 350) * -1;  // @@@@@@@@@@@@@@@@@@@@@@@@@2
+                enemyCar.style.top = enemyCar.y + "px";
+                // enemyCar.style.background = 'blue';
+                enemyCar.style.backgroundColor = randomColor();
+                enemyCar.style.left = Math.floor(Math.random() * 350 ) + "px";
+                gameArea.appendChild(enemyCar);
+             }
+         }
+           //Day-5
+           //24:00
+           //Different Color for Enemycar
+           function randomColor(){
+               function c(){
+                   let hex = Math.floor(Math.random() * 256).toString(16);
+                   return ("0" + String(hex)).substring(-2);
+               }
+               return "#"+c()+c()+c();
+           }
+           //Day-5
+    </script>
+</body>
+</html>
